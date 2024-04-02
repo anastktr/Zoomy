@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Zoomy</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script>
+    const ROOM_ID = "<%= roomId %>"
+  </script>
+  <script defer src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="script.js" defer></script>
+  <title>Document</title>
+  <style>
+    body {
+      margin-top: 0px;
+      background: url('https://unblast.com/wp-content/uploads/2021/01/Space-Background-Image-8.jpg') center/cover no-repeat;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: grid;
+      grid-template-rows: 0.2fr 1fr 1fr 1fr;
+      grid-template-areas:
+        "header header header header"
+        "video video video chat"
+        "video video video chat"
+        "video video video chat";
+      height: 100vh;
+    }
+    canvas {
+      background-color: black;
+      display: none;
+      border: 1px solid white;
+    }
+
+    #d1 {
+      grid-area: video;
+      display: flex;
+      flex-direction: column;
+      /*justify-content: space-between; */
+      align-items: center;
+      text-align: center;
+    }
+
+    #video-grid {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    video {
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #username-input,
+    #filter,
+    #hang-up,
+    #share-button,
+    #toggle-camera-btn,
+    #toggle-mic-btn,
+    #snapshot-button,
+    #toggle-source-button,
+    #username-button,
+    #game-button{
+      margin-top: 16px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #d2 {
+      width: 400px;
+      grid-area: chat;
+      display: flex;
+      flex-direction: column;
+      align-items: center ;
+    }
+
+    #inner{
+      
+      width: 400px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    select{
+      border-radius: 8px;
+    }
+
+    #ok{
+      margin-left: 75px;
+      margin-top: 8px;
+      padding: 8px;
+    }
+    
+
+    #chat-container {
+      background-color: black;
+      flex: 1;
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-height: 80%;
+      width: 100%;
+      overflow-y: auto;
+      word-wrap: break-word; /* spane oi grammes an einai megales sto chat */
+    }
+
+    #chat-input {
+      margin-top: 8px;
+      padding: 8px;
+      width: 109%;
+      box-sizing: border-box;
+    }
+
+    
+    #hang-up,
+    #share-button,
+    #toggle-camera-btn,
+    #toggle-mic-btn,
+    #snapshot-button,
+    #toggle-source-button,
+    #username-button,
+    #game-button
+    {
+      margin-top: 16px;
+      padding: 6px; /* Adjust the padding for button size */
+      font-size: 12px; /* Adjust the font size for button size */
+      cursor: pointer;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: none;
+      color: #fff;
+      margin-right: 8px;
+      width:80px;
+      height:80px;
+    }
+
+
+    .buttons
+    {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .buttons2
+    {
+      display: flex;
+      flex-direction: row;
+    }
+
+
+    #v
+    {
+      display:flex;
+      flex-direction: row;
+    }
+
+    body h1   /* xrisi tou child combinator kathws to h1 sto dom tree tha einai paidi tou header*/
+    {
+      
+      grid-area: header;
+      color: black;  /*ruthmizoume to xrwma */
+      font-size: 37px;       /*ruthmizoume to megethos ths grammatoseiras*/
+      font-family: Arial, Helvetica, sans-serif;   /*epilegoume thn grammatoseira*/
+      text-align: center;
+      background-color: rgb(53, 53, 189);
+      height: 40px;
+      margin-top: 0px;
+    }
+
+    #d2 input 
+    {
+      border-radius: 8px;
+    }
+
+
+    #hang-up
+    {
+        background-color: rgb(175, 25, 25);
+    }
+
+    #snapshot-button{
+      background-color: rgb(151, 160, 33);
+    }
+
+    #sound-bar {
+      width: 300px;
+      height: 20px;
+      background-color: #ccc;
+      margin-top: 20px;
+    }
+
+    #soundbtn
+    {
+      display: flex;
+      flex-direction: row;
+    }
+
+    #play-button,
+    #play-button2,
+    #play-button3
+    {
+
+      margin-top: 16px;
+      padding: 6px; 
+      font-size: 12px; 
+      cursor: pointer;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: none;
+      color: #fff;
+      margin-right: 8px;
+      width:80px;
+      height:80px;
+    }
+ 
+    
+  </style>
+ 
+</head>
+
+<body>
+
+<h1>Zoomy</h1>
+<div id="d1">
+
+  
+  
+  <div id="v">
+    <div id="video-grid"></div>
+  </div>
+
+  <div class="buttons2">
+
+    <button id="hang-up">Hang up</button>
+    <button id="username-button">Set Username</button>
+  </div>
+  
+  
+
+  <div class="buttons">
+    <button id="share-button">Share</button>
+    <button id="toggle-camera-btn">Disable Camera</button>
+    <button id="toggle-mic-btn">Disable Microphone</button>
+    <button id="toggle-source-button">Toggle Source</button>
+    <button id="game-button">Game</button> 
+    
+  </div>
+
+
+  <div id="soundbtn">
+    <button id="play-button">sound1</button>
+    <button id="play-button2">sound2</button>
+    <button id="play-button3">sound3</button>
+  </div>
+
+  <canvas width="400" height="400" id="game"></canvas>
+  <button id="restart-button" style="display: none;">Restart Game</button>
+
+</div>
+
+
+<div id="d2">
+  <div id="chat-container"></div>
+
+  <div id="inner">
+    <input id="chat-input" type="text" placeholder="Type a message...">
+    <div id="ok">
+      <button id="snapshot-button" >Snap Photo</button>
+      <select id="filter-select">
+        <option value="'none'">None</option>
+        <option value="grayscale(100%)">Grayscale</option>
+        <option value="sepia(100%)">Sepia</option>
+        <option value="blur(5px)">Blur</option>
+        <option value="brightness(150%)">Brightness</option>
+        <option value="contrast(200%)">Contrast</option>
+        <option value="hue-rotate(90deg)">Hue-Rotate</option>
+        <option value="invert(100%)">Invert Colour</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+
+
+
+</body>
+</html>
